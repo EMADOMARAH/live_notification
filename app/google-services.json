@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "364521450516",
+    "project_id": "live-notification-260c0",
+    "storage_bucket": "live-notification-260c0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364521450516:android:4b565e53a550609a764b01",
+        "android_client_info": {
+          "package_name": "com.emad.live_notification"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "364521450516-nr69qbolm7cgspt8g0q0ic8fh6nmtnm5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1CM8CgnTK3hbbkQCXc9hhrp77ISBRgEc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "364521450516-nr69qbolm7cgspt8g0q0ic8fh6nmtnm5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
