@@ -4,10 +4,11 @@
     package="com.emad.live_notification"
     >
 
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"></uses-permission>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -17,17 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Live_notification"
         >
-        <service
-            android:name=".FirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service android:name=".BackgroundServices"></service>
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/black" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".auth.Auth">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,7 +26,32 @@
             </intent-filter>
         </activity>
 
-    </application>
+        <service android:name=".BackgroundServices" />
+        <service
+            android:name=".ExampleJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            />
+        <service
+            android:name=".auth.Utility.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name=".auth.Utility.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/black"
+            />
+
+        <activity android:name=".MainActivity">
+
+        </activity>
+    </application>
 
 </manifest>

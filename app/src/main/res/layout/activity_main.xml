@@ -1,38 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:gravity="center"
-    android:orientation="vertical"
-    >
+    android:layout_height="match_parent">
 
-    <EditText
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name"
-        android:backgroundTint="@color/black"
-        android:paddingHorizontal="30dp"
-        android:textColorHint="@color/black"
-        android:id="@+id/name_edit_txt"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save Name"
-        android:id="@+id/save_btn"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Stop Service"
-        android:id="@+id/stop_service_btn"
-        android:layout_marginTop="50dp"
-        />
+        android:id="@+id/recyclerView"
+        android:scrollbars="vertical"
+        android:nestedScrollingEnabled="true"
+        >
 
-</LinearLayout>
+    </androidx.recyclerview.widget.RecyclerView>
+
+</RelativeLayout>
+<!--<LinearLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    tools:context=".MainActivity"-->
+<!--    android:gravity="center"-->
+<!--    android:orientation="vertical"-->
+<!--    >-->
+
+<!--    <EditText-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Name"-->
+<!--        android:backgroundTint="@color/black"-->
+<!--        android:paddingHorizontal="30dp"-->
+<!--        android:textColorHint="@color/black"-->
+<!--        android:id="@+id/name_edit_txt"-->
+<!--        android:textSize="20sp"-->
+<!--        android:textColor="@color/black"-->
+<!--        />-->
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Save Name"-->
+<!--        android:id="@+id/save_btn"-->
+<!--        android:onClick="scheduleJob"-->
+<!--        />-->
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Stop Service"-->
+<!--        android:id="@+id/stop_service_btn"-->
+<!--        android:onClick="cancelJob"-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        />-->
+
+<!--</LinearLayout>-->
