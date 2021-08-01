@@ -40,13 +40,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MessageDialog extends DialogFragment {
 
     private static final String TAG = "MessageDialog";
+    //reference for user data
     DatabaseReference reference;
+    //reference for messages data
     DatabaseReference msgReference;
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    String device_token;
-    Post post;
-    Notification notification;
 
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    //device token who will receive notification
+    String device_token;
+
+    Notification notification;
     ApiInterface apiInterface;
     Retrofit retrofit;
 
@@ -72,13 +75,16 @@ public class MessageDialog extends DialogFragment {
         reference =  database.getReference("users");
         msgReference= database.getReference();
 
+        //get user id that i clicked on
         mUserId = getArguments().getString("intent_user_id");
 
+        //make new object from retrofit
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://fcm.googleapis.com/fcm/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        //get the device token who will receive notification depends on the id
         reference.child(mUserId).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -113,6 +119,7 @@ public class MessageDialog extends DialogFragment {
                     message.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
                     message.setMessage(mMessage.getText().toString());
                     message.setTimestamp(getTimestamp());
+                    //make the notification title and body the will be sent
                     notification = new Notification("Api Notification",mMessage.getText().toString());
 
 
@@ -137,14 +144,14 @@ public class MessageDialog extends DialogFragment {
         apiInterface = retrofit.create(ApiInterface.class);
 
         Post post = new Post(notification , device_token);
-
+        //save the message to firebase
         msgReference
                 .child("messages")
                 .child(mUserId)
                 .child(reference.push().getKey())
                 .setValue(message);
 
-
+        //make the api call that lunch the notification
         Call<Response> sendNotify = apiInterface.sendNotification(post);
         sendNotify.enqueue(new Callback<Response>() {
             @Override

@@ -1,0 +1,41 @@
+//Send FCM Notification With Rest Apis
+for more info : https://selvaganesh93.medium.com/firebase-cloud-messaging-important-rest-apis-be79260022b5
+--------------------------------------------------------------
+URL:
+https://fcm.googleapis.com/fcm/send
+
+Header:
+
+"Content-Type": "application/json",
+"Authorization": "key=<Server_key>"
+
+BODY:
+
+{
+    "to": "<Device FCM token>",
+    "notification": {
+      "title": "Check this Mobile (title)",
+      "body": "Rich Notification testing (body)",
+      "mutable_content": true,
+      "sound": "Tri-tone"
+      },
+
+   "data": {
+    "url": "<url of media image>",
+    "dl": "<deeplink action on tap of notification>"
+      }
+}
+
+Configure in Build.gradle(Module)
+// Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:28.3.0')
+    // Declare the dependency for the Firebase SDK for Google Analytics
+    implementation 'com.google.firebase:firebase-analytics'
+    // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+

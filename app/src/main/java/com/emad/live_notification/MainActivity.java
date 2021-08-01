@@ -64,10 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private UserAdapter mUserAdapter;
 
 
-    EditText editText ;
-    Button button , stopServiceButton;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,13 +72,10 @@ public class MainActivity extends AppCompatActivity {
         reference =  database.getReference("users");
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
-
         setupFirebaseAuth();
         setupUserList();
         getUserList();
         initFCM();
-
-
 
   }
 
