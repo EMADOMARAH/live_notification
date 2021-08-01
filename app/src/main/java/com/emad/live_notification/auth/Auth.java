@@ -30,10 +30,8 @@ public class Auth extends AppCompatActivity {
 
 
     TextInputEditText email_txt , password_txt;
-    String email , password;
+    String email,password;
     String deviceToken;
-
-
 
     @Override
     protected void onStart() {
@@ -146,4 +144,5 @@ public class Auth extends AppCompatActivity {
 
         Log.d("Auth" , email + "  " + password);
     }
+
 }
