@@ -9,12 +9,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.emad.live_notification.R;
+import com.emad.live_notification.auth.ApiInterface;
 import com.emad.live_notification.auth.Models.Message;
+import com.emad.live_notification.auth.Models.Request.Notification;
+import com.emad.live_notification.auth.Models.Request.Post;
+import com.emad.live_notification.auth.Models.Responce.Response;
+import com.emad.live_notification.auth.Models.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -23,9 +32,23 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MessageDialog extends DialogFragment {
 
     private static final String TAG = "MessageDialog";
+    DatabaseReference reference;
+    DatabaseReference msgReference;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    String device_token;
+    Post post;
+    Notification notification;
+
+    ApiInterface apiInterface;
+    Retrofit retrofit;
 
     //create a new bundle and set the arguments to avoid a null pointer
     public MessageDialog(){
@@ -36,16 +59,38 @@ public class MessageDialog extends DialogFragment {
 
     //widgets
     EditText mMessage;
+    Message message;
 
     //vars
-    private String mUserId;
+    private String mUserId , deviceToken;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: started.");
+        reference =  database.getReference("users");
+        msgReference= database.getReference();
+
         mUserId = getArguments().getString("intent_user_id");
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://fcm.googleapis.com/fcm/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        reference.child(mUserId).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                }
+                else {
+                    device_token= task.getResult().getValue(User.class).getDevice_token();
+                }
+
+            }
+        });
     }
 
     @Nullable
@@ -54,27 +99,28 @@ public class MessageDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_message, container, false);
         mMessage = (EditText) view.findViewById(R.id.message);
 
+        message = new Message();
         Button send = (Button) view.findViewById(R.id.send);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: sending a new message");
 
                 DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
                 if(!mMessage.getText().toString().equals("")){
 
                     //create the new message
-                    Message message = new Message();
+
                     message.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
                     message.setMessage(mMessage.getText().toString());
                     message.setTimestamp(getTimestamp());
+                    notification = new Notification("Api Notification",mMessage.getText().toString());
+
+
 
                     //insert the new message
-                    reference
-                            .child("messages")
-                            .child(mUserId)
-                            .child(reference.push().getKey())
-                            .setValue(message);
+
+                    sendMessage();
+
                     Toast.makeText(getActivity(), "message sent", Toast.LENGTH_SHORT).show();
                 }else{
                     Toast.makeText(getActivity(), "enter a message", Toast.LENGTH_SHORT).show();
@@ -84,6 +130,37 @@ public class MessageDialog extends DialogFragment {
         });
 
         return view;
+    }
+
+    private void sendMessage() {
+
+        apiInterface = retrofit.create(ApiInterface.class);
+
+        Post post = new Post(notification , device_token);
+
+        msgReference
+                .child("messages")
+                .child(mUserId)
+                .child(reference.push().getKey())
+                .setValue(message);
+
+
+        Call<Response> sendNotify = apiInterface.sendNotification(post);
+        sendNotify.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                System.out.println(response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+
+            }
+        });
+
+
+
+
     }
 
     /**

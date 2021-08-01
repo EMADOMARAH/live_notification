@@ -30,6 +30,8 @@ import com.emad.live_notification.auth.Auth;
 import com.emad.live_notification.auth.Models.User;
 import com.emad.live_notification.auth.Utility.MessageDialog;
 import com.emad.live_notification.auth.Utility.UserAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -39,6 +41,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.installations.FirebaseInstallations;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 
@@ -65,17 +68,14 @@ public class MainActivity extends AppCompatActivity {
     Button button , stopServiceButton;
 
 
-    Member member;
-
-    private NotificationManager manager;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        reference =  database.getReference("users");
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+
 
         setupFirebaseAuth();
         setupUserList();
@@ -83,97 +83,31 @@ public class MainActivity extends AppCompatActivity {
         initFCM();
 
 
-        member = new Member();
-//        button = findViewById(R.id.save_btn);
-//        editText = findViewById(R.id.name_edit_txt);
-//        stopServiceButton = findViewById(R.id.stop_service_btn);
 
-        reference =  database.getReference("User");
-
-//        Intent serviceIntent = new Intent(this , BackgroundServices.class);
-//        startService(serviceIntent);
-//
-//
-//
-//        reference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//
-//                if (snapshot.exists()){
-//                    id = (int)snapshot.getChildrenCount();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                // Failed to read value
-//                Log.w("Error", "Failed to read value.", error.toException());
-//            }
-//        });
-//
-//
-//        reference.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//               // String name = editText.getText().toString();
-//
-//                //notification(snapshot.getValue().toString());
-//
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
-
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                String name = editText.getText().toString();
-//                if (name.isEmpty()){
-//                    Toast.makeText(MainActivity.this, "Enter Name", Toast.LENGTH_SHORT).show();
-//                }else {
-//                    member.setName (editText.getText().toString());
-//                    reference.child(String.valueOf(id+1)).setValue(member);
-//                }
-//            }
-//        });
-//        stopServiceButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent serviceIntent = new Intent(getApplicationContext() , BackgroundServices.class);
-//                stopService(serviceIntent);
-//            }
-//        });
-
-
-    }
+  }
 
 
     private void initFCM(){
-        String token = FirebaseMessaging.getInstance().getToken().toString();
-        Log.d(TAG, "initFCM: token: " + token);
-        sendRegistrationToServer(token);
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        String deviceToken = task.getResult();
+
+                        reference.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .child("device_token")
+                                .setValue(deviceToken);
+                    }
+                });
 
     }
+
     public void openMessageDialog(String userId){
         Log.d(TAG, "openMessageDialog: opening a dialog to send a new message");
         MessageDialog dialog = new MessageDialog();
@@ -196,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
                 for(DataSnapshot snapshot: dataSnapshot.getChildren()){
                     User user = snapshot.getValue(User.class);
-                    Log.d(TAG, "onDataChange: found a user: " + user.getName());
                     mUsers.add(user);
                 }
                 mUserAdapter.notifyDataSetChanged();
@@ -209,14 +142,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void sendRegistrationToServer(String token) {
-        Log.d(TAG, "sendRegistrationToServer: sending token to server: " + token);
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        reference.child("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .child("messaging_token")
-                .setValue(token);
-    }
 
     private void setupUserList(){
         mUsers = new ArrayList<>();
@@ -288,50 +213,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-    public void scheduleJob(View v) {
-        ComponentName componentName = new ComponentName(this, ExampleJobService.class);
-        JobInfo info = new JobInfo.Builder(123, componentName)
-                .setRequiresCharging(true)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-                .setPersisted(true)
-                .setPeriodic(15 * 60 * 1000)
-                .build();
-
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-        int resultCode = scheduler.schedule(info);
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job scheduled");
-        } else {
-            Log.d(TAG, "Job scheduling failed");
-        }
-    }
-
-    public void cancelJob(View v) {
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-        scheduler.cancel(123);
-        Log.d(TAG, "Job cancelled");
-    }
-
-
-    //    private void notification(String data){
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-//            NotificationChannel channel = new NotificationChannel("n","n" , NotificationManager.IMPORTANCE_DEFAULT);
-//            NotificationManager manager = getSystemService(NotificationManager.class);
-//            manager.createNotificationChannel(channel);
-//
-//        }
-//
-//        Notification builder = new Notification.Builder(this , "n")
-//                .setContentText("Simple Text")
-//                .setSmallIcon(R.drawable.ic_launcher_background)
-//                .setAutoCancel(true)
-//                .setContentText(data.toString())
-//                .build();
-//
-////        NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
-////        managerCompat.notify(999, builder.build());
-//
-//    }
 }

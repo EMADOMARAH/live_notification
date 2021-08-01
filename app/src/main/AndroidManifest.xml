@@ -26,23 +26,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".BackgroundServices" />
-        <service
-            android:name=".ExampleJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            />
-        <service
-            android:name=".auth.Utility.MyFirebaseInstanceIDService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-            </intent-filter>
-        </service>
-        <service
-            android:name=".auth.Utility.MyFirebaseMessagingService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"

@@ -20,6 +20,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class Auth extends AppCompatActivity {
 
@@ -30,6 +31,8 @@ public class Auth extends AppCompatActivity {
 
     TextInputEditText email_txt , password_txt;
     String email , password;
+    String deviceToken;
+
 
 
     @Override
@@ -90,6 +93,21 @@ public class Auth extends AppCompatActivity {
         email = email_txt.getText().toString();
         password  = password_txt.getText().toString();
 
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        deviceToken = task.getResult();
+
+                    }
+                });
+
         mAuth.createUserWithEmailAndPassword(email , password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
@@ -98,6 +116,7 @@ public class Auth extends AppCompatActivity {
 
                    User user = new User();
                    user.setName(email.substring(0, email.indexOf("@")));
+                   user.setDevice_token(deviceToken);
                    user.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
                    FirebaseDatabase.getInstance().getReference()
                            .child("users")
